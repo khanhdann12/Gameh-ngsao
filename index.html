@@ -1,0 +1,898 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080b25">
+<meta name="description" content="Star Catcher - Game hứng sao trong vũ trụ neon.">
+<title>Star Catcher ✦ Hứng Sao</title>
+
+<style>
+:root {
+  --cyan: #78f4ff;
+  --purple: #ad8cff;
+  --pink: #ff8de1;
+  --gold: #ffe89a;
+  --panel: rgba(13, 20, 55, .88);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: white;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(ellipse at 50% 0%, #252d70 0%, #101638 42%, #040613 100%);
+  display: flex;
+  justify-content: center;
+  padding: 20px 12px;
+}
+
+button { font: inherit; }
+
+.game {
+  width: min(100%, 960px);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+h1 {
+  font-size: clamp(23px, 4vw, 34px);
+  margin: 0;
+  letter-spacing: 1px;
+  color: var(--cyan);
+  text-shadow: 0 0 20px #78f4ff77;
+}
+
+.subtitle {
+  margin-top: 4px;
+  color: #bac8ff;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  border: 1px solid #8eacff55;
+  border-radius: 12px;
+  background: #111936cc;
+  padding: 9px 12px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.stat small {
+  display: block;
+  color: #aebce9;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.stat strong {
+  font-size: 17px;
+  color: var(--gold);
+}
+
+.arena {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #8deeff88;
+  border-radius: 18px;
+  background: #06091b;
+  box-shadow: 0 0 32px #716aff26, 0 0 70px #45cfff10;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: #05091bd9;
+  backdrop-filter: blur(5px);
+}
+
+.overlay.hidden { display: none; }
+
+.dialog {
+  width: min(100%, 450px);
+  text-align: center;
+  padding: 26px 22px;
+  border: 1px solid #91eaff88;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #1a2555f5, #0b102af7);
+  box-shadow: 0 0 38px #766cff2c;
+}
+
+.emoji {
+  font-size: 44px;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 0 12px #7cecff);
+}
+
+.dialog h2 {
+  margin: 4px 0 12px;
+  font-size: clamp(25px, 5vw, 35px);
+  color: var(--gold);
+}
+
+.dialog p {
+  color: #d7e2ff;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.primary {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 24px;
+  margin-top: 8px;
+  background: linear-gradient(100deg, var(--cyan), #b7a0ff);
+  color: #09112b;
+  font-weight: 850;
+  cursor: pointer;
+  box-shadow: 0 0 22px #78f4ff33;
+  transition: transform .15s, filter .15s;
+}
+
+.primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  color: #b7c5f1;
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.secondary {
+  border: 1px solid #839bff66;
+  background: #111936cc;
+  color: #e6edff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.secondary:hover { background: #202b57; }
+
+.legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding: 12px 4px;
+  color: #d2dcff;
+  font-size: 12px;
+}
+
+.legend b { color: var(--gold); }
+
+.mobile-hint {
+  display: none;
+  text-align: center;
+  color: #9fb3ec;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  body { padding: 12px 8px; }
+  header { align-items: flex-start; }
+  .stats { width: 100%; }
+  .stat { flex: 1; min-width: 0; padding: 7px 4px; }
+  .stat strong { font-size: 15px; }
+  .bottom { justify-content: center; }
+  .mobile-hint { display: block; }
+  .dialog { padding: 18px 15px; }
+  .dialog p { font-size: 12px; }
+  .emoji { font-size: 34px; }
+}
+</style>
+</head>
+
+<body>
+<main class="game">
+  <header>
+    <div>
+      <h1>✦ STAR CATCHER</h1>
+      <div class="subtitle">COSMIC STAR HUNT</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <small>ĐIỂM SỐ</small>
+        <strong id="score">0</strong>
+      </div>
+      <div class="stat">
+        <small>MẠNG</small>
+        <strong id="lives">❤️❤️❤️</strong>
+      </div>
+      <div class="stat">
+        <small>KỶ LỤC</small>
+        <strong id="best">0</strong>
+      </div>
+      <div class="stat">
+        <small>CẤP ĐỘ</small>
+        <strong id="level">1</strong>
+      </div>
+    </div>
+  </header>
+
+  <section class="arena">
+    <canvas id="gameCanvas" width="960" height="600"
+      aria-label="Khu vực chơi game Star Catcher"></canvas>
+
+    <div class="overlay" id="overlay">
+      <div class="dialog">
+        <div class="emoji" id="dialogEmoji">🌌</div>
+        <h2 id="dialogTitle">Hứng Sao!</h2>
+        <p id="dialogText">
+          Điều khiển chiếc giỏ neon để hứng sao trong vũ trụ.
+          Đừng để sao rơi mất nhé!
+          <br><br>
+          <b>Máy tính:</b> di chuyển chuột hoặc nhấn phím ← →
+          <br>
+          <b>Điện thoại:</b> chạm và kéo trên màn hình game
+        </p>
+        <button class="primary" id="startButton">BẮT ĐẦU CHƠI ✨</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="mobile-hint">
+    👆 Chạm và kéo ngón tay để di chuyển chiếc giỏ
+  </div>
+
+  <div class="legend">
+    <span>⭐ Sao vàng: <b>+10 điểm</b></span>
+    <span>💎 Sao xanh: <b>+25 điểm</b></span>
+    <span>❤️ Mỗi sao rơi: mất 1 mạng</span>
+  </div>
+
+  <div class="bottom">
+    <span>🌠 Hứng sao càng nhiều, tốc độ càng tăng!</span>
+    <div class="actions">
+      <button class="secondary" id="pauseButton">⏸ Tạm dừng</button>
+      <button class="secondary" id="soundButton">🔊 Âm thanh</button>
+    </div>
+  </div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const $ = id => document.getElementById(id);
+
+  const scoreEl = $("score");
+  const livesEl = $("lives");
+  const bestEl = $("best");
+  const levelEl = $("level");
+  const overlay = $("overlay");
+  const dialogEmoji = $("dialogEmoji");
+  const dialogTitle = $("dialogTitle");
+  const dialogText = $("dialogText");
+  const startButton = $("startButton");
+  const pauseButton = $("pauseButton");
+  const soundButton = $("soundButton");
+
+  const W = canvas.width;
+  const H = canvas.height;
+
+  let score = 0;
+  let lives = 3;
+  let best = 0;
+  let level = 1;
+  let state = "ready"; // ready, playing, paused, over
+  let soundEnabled = true;
+  let audioContext = null;
+  let lastTime = 0;
+  let spawnTimer = 0;
+  let animationId = 0;
+  let shake = 0;
+
+  const keys = Object.create(null);
+  const stars = [];
+  const particles = [];
+  const background = [];
+
+  const basket = {
+    x: W / 2,
+    y: H - 64,
+    width: 112,
+    height: 34,
+    targetX: W / 2
+  };
+
+  try {
+    best = Number(localStorage.getItem("starCatcherBest") || 0);
+  } catch (_) {
+    best = 0;
+  }
+
+  bestEl.textContent = best;
+
+  for (let i = 0; i < 130; i++) {
+    background.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.7 + .3,
+      phase: Math.random() * Math.PI * 2,
+      speed: Math.random() * 2 + .5
+    });
+  }
+
+  function playTone(freq, duration = .09, type = "sine") {
+    if (!soundEnabled) return;
+
+    try {
+      if (!audioContext) {
+        audioContext = new (
+          window.AudioContext || window.webkitAudioContext
+        )();
+      }
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+
+      gain.gain.setValueAtTime(.055, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(
+        .001,
+        audioContext.currentTime + duration
+      );
+
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + duration);
+    } catch (_) {
+      // Game vẫn chơi bình thường nếu trình duyệt không hỗ trợ âm thanh.
+    }
+  }
+
+  function updateUI() {
+    scoreEl.textContent = score;
+    livesEl.textContent =
+      "❤️".repeat(lives) + "🖤".repeat(3 - lives);
+    bestEl.textContent = best;
+    levelEl.textContent = level;
+  }
+
+  function saveBest() {
+    if (score <= best) return;
+
+    best = score;
+    try {
+      localStorage.setItem("starCatcherBest", String(best));
+    } catch (_) {}
+
+    updateUI();
+  }
+
+  function resetGame() {
+    score = 0;
+    lives = 3;
+    level = 1;
+    spawnTimer = 0;
+    shake = 0;
+
+    stars.length = 0;
+    particles.length = 0;
+
+    basket.x = W / 2;
+    basket.targetX = W / 2;
+
+    updateUI();
+  }
+
+  function showOverlay(emoji, title, message, buttonText) {
+    dialogEmoji.textContent = emoji;
+    dialogTitle.textContent = title;
+    dialogText.innerHTML = message;
+    startButton.textContent = buttonText;
+    overlay.classList.remove("hidden");
+  }
+
+  function startGame() {
+    if (state === "playing") return;
+
+    resetGame();
+    state = "playing";
+    overlay.classList.add("hidden");
+    pauseButton.textContent = "⏸ Tạm dừng";
+
+    lastTime = performance.now();
+    cancelAnimationFrame(animationId);
+    animationId = requestAnimationFrame(loop);
+
+    playTone(520, .12);
+    playTone(760, .12);
+  }
+
+  function pauseGame() {
+    if (state === "playing") {
+      state = "paused";
+      showOverlay(
+        "⏸️",
+        "Đã tạm dừng",
+        "Bạn có thể nghỉ một chút.<br>Nhấn tiếp tục khi sẵn sàng!",
+        "TIẾP TỤC ▶"
+      );
+      startButton.onclick = resumeGame;
+      pauseButton.textContent = "▶ Tiếp tục";
+    } else if (state === "paused") {
+      resumeGame();
+    }
+  }
+
+  function resumeGame() {
+    if (state !== "paused") return;
+
+    state = "playing";
+    overlay.classList.add("hidden");
+    pauseButton.textContent = "⏸ Tạm dừng";
+    lastTime = performance.now();
+    animationId = requestAnimationFrame(loop);
+  }
+
+  function endGame() {
+    state = "over";
+    saveBest();
+    updateUI();
+
+    showOverlay(
+      "🌙",
+      "Kết thúc lượt chơi!",
+      `Bạn đạt <b style="color:#ffe89a">${score} điểm</b>!<br>
+       Cấp độ đạt được: <b>${level}</b><br>
+       Kỷ lục hiện tại: <b>${best}</b><br><br>
+       Hãy thử lại để phá kỷ lục nhé!`,
+      "CHƠI LẠI ✨"
+    );
+
+    startButton.onclick = startGame;
+    pauseButton.textContent = "⏸ Tạm dừng";
+    playTone(240, .25, "triangle");
+  }
+
+  function starShape(x, y, radius, points = 5) {
+    ctx.beginPath();
+
+    for (let i = 0; i < points * 2; i++) {
+      const angle = -Math.PI / 2 + i * Math.PI / points;
+      const r = i % 2 === 0 ? radius : radius * .43;
+      const px = x + Math.cos(angle) * r;
+      const py = y + Math.sin(angle) * r;
+
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+
+    ctx.closePath();
+  }
+
+  function spawnStar() {
+    const gem = Math.random() < .17;
+
+    stars.push({
+      x: 28 + Math.random() * (W - 56),
+      y: -25,
+      radius: gem ? 13 : 12,
+      speed: 145 + Math.random() * 85 + (level - 1) * 24,
+      drift: (Math.random() - .5) * 30,
+      rotation: Math.random() * Math.PI * 2,
+      spin: (Math.random() - .5) * 2.4,
+      gem
+    });
+  }
+
+  function createBurst(x, y, color, amount = 18) {
+    for (let i = 0; i < amount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 45 + Math.random() * 190;
+      const life = .4 + Math.random() * .45;
+
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life,
+        maxLife: life,
+        radius: 2 + Math.random() * 3,
+        color
+      });
+    }
+  }
+
+  function drawBackground(time) {
+    const gradient = ctx.createLinearGradient(0, 0, 0, H);
+    gradient.addColorStop(0, "#10183d");
+    gradient.addColorStop(.55, "#090e29");
+    gradient.addColorStop(1, "#040616");
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, W, H);
+
+    // Ánh sáng xanh tím ở trung tâm vũ trụ.
+    const nebula = ctx.createRadialGradient(
+      W * .52, H * .38, 10,
+      W * .52, H * .38, W * .55
+    );
+
+    nebula.addColorStop(0, "#5640a522");
+    nebula.addColorStop(.5, "#273da41a");
+    nebula.addColorStop(1, "#090d2700");
+
+    ctx.fillStyle = nebula;
+    ctx.fillRect(0, 0, W, H);
+
+    background.forEach(s => {
+      const alpha = .25 + .65 *
+        ((Math.sin(time * .001 * s.speed + s.phase) + 1) / 2);
+
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = "#d9faff";
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.globalAlpha = 1;
+  }
+
+  function drawStar(s) {
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.rotate(s.rotation);
+
+    const color = s.gem ? "#72f7ff" : "#ffe58b";
+
+    ctx.shadowColor = color;
+    ctx.shadowBlur = s.gem ? 26 : 20;
+    ctx.fillStyle = color;
+
+    starShape(0, 0, s.radius);
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "#ffffffcc";
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+
+    // Chấm sáng nhỏ ở giữa.
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(0, 0, 2.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawBasket() {
+    const x = basket.x - basket.width / 2;
+    const y = basket.y;
+
+    ctx.save();
+    ctx.shadowColor = "#76f4ff";
+    ctx.shadowBlur = 23;
+
+    const gradient = ctx.createLinearGradient(
+      x, y, x, y + basket.height
+    );
+
+    gradient.addColorStop(0, "#b6ffff");
+    gradient.addColorStop(.4, "#73dfff");
+    gradient.addColorStop(1, "#8d83ff");
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + basket.width, y);
+    ctx.lineTo(x + basket.width - 14, y + basket.height);
+    ctx.quadraticCurveTo(
+      basket.x, y + basket.height + 10,
+      x + 14, y + basket.height
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "#e5ffff";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffffaa";
+    ctx.fillRect(x + 12, y + 5, basket.width - 24, 4);
+
+    // Hai điểm sáng trang trí.
+    ctx.fillStyle = "#ffffffcc";
+    ctx.beginPath();
+    ctx.arc(x + 17, y + 16, 2, 0, Math.PI * 2);
+    ctx.arc(x + basket.width - 17, y + 16, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawParticles(dt) {
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 120 * dt;
+      p.life -= dt;
+
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+        continue;
+      }
+
+      ctx.globalAlpha = Math.min(1, p.life / p.maxLife);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 10;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+  }
+
+  function draw(time, dt = 0) {
+    ctx.save();
+
+    if (shake > 0) {
+      ctx.translate(
+        (Math.random() - .5) * shake,
+        (Math.random() - .5) * shake
+      );
+    }
+
+    drawBackground(time);
+    stars.forEach(drawStar);
+    drawParticles(dt);
+    drawBasket();
+
+    ctx.restore();
+  }
+
+  function update(dt) {
+    // Điều khiển bằng bàn phím.
+    const moveSpeed = 470;
+
+    if (keys.ArrowLeft || keys.a || keys.A) {
+      basket.targetX -= moveSpeed * dt;
+    }
+
+    if (keys.ArrowRight || keys.d || keys.D) {
+      basket.targetX += moveSpeed * dt;
+    }
+
+    basket.targetX = Math.max(
+      basket.width / 2,
+      Math.min(W - basket.width / 2, basket.targetX)
+    );
+
+    basket.x += (basket.targetX - basket.x) *
+      Math.min(1, dt * 15);
+
+    // Độ khó tăng theo điểm.
+    const newLevel = Math.floor(score / 100) + 1;
+
+    if (newLevel !== level) {
+      level = newLevel;
+      updateUI();
+      playTone(740, .12);
+    }
+
+    spawnTimer += dt;
+
+    const interval = Math.max(.30, .82 - (level - 1) * .045);
+
+    if (spawnTimer >= interval) {
+      spawnTimer = 0;
+      spawnStar();
+
+      if (level >= 3 && Math.random() < .3) {
+        spawnStar();
+      }
+    }
+
+    for (let i = stars.length - 1; i >= 0; i--) {
+      const s = stars[i];
+
+      s.y += s.speed * dt;
+      s.x += s.drift * dt;
+      s.rotation += s.spin * dt;
+
+      // Sao có thể trôi nhẹ nhưng không bay khỏi màn hình quá xa.
+      s.x = Math.max(8, Math.min(W - 8, s.x));
+
+      const basketLeft = basket.x - basket.width / 2;
+      const basketRight = basket.x + basket.width / 2;
+      const caught =
+        s.y + s.radius >= basket.y &&
+        s.y - s.radius <= basket.y + basket.height + 8 &&
+        s.x >= basketLeft - 4 &&
+        s.x <= basketRight + 4;
+
+      if (caught) {
+        const points = s.gem ? 25 : 10;
+        score += points;
+
+        createBurst(
+          s.x, s.y,
+          s.gem ? "#72f7ff" : "#ffe58b",
+          s.gem ? 26 : 17
+        );
+
+        stars.splice(i, 1);
+        saveBest();
+        updateUI();
+
+        playTone(s.gem ? 1000 : 680, .075);
+        continue;
+      }
+
+      if (s.y - s.radius > H) {
+        stars.splice(i, 1);
+        lives--;
+        shake = 8;
+        updateUI();
+        playTone(190, .13, "triangle");
+
+        if (lives <= 0) {
+          endGame();
+          return;
+        }
+      }
+    }
+
+    shake = Math.max(0, shake - 28 * dt);
+  }
+
+  function loop(time) {
+    if (state !== "playing") return;
+
+    const dt = Math.min((time - lastTime) / 1000, .035);
+    lastTime = time;
+
+    update(dt);
+    draw(time, dt);
+
+    if (state === "playing") {
+      animationId = requestAnimationFrame(loop);
+    }
+  }
+
+  // Chuyển tọa độ màn hình sang tọa độ canvas.
+  function setTargetFromPointer(event) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W / rect.width;
+
+    basket.targetX = (event.clientX - rect.left) * scaleX;
+    basket.targetX = Math.max(
+      basket.width / 2,
+      Math.min(W - basket.width / 2, basket.targetX)
+    );
+  }
+
+  canvas.addEventListener("pointerdown", event => {
+    event.preventDefault();
+
+    try {
+      canvas.setPointerCapture(event.pointerId);
+    } catch (_) {}
+
+    setTargetFromPointer(event);
+  });
+
+  canvas.addEventListener("pointermove", event => {
+    if (event.pointerType === "mouse" || event.buttons > 0) {
+      setTargetFromPointer(event);
+    }
+  });
+
+  window.addEventListener("keydown", event => {
+    if (["ArrowLeft", "ArrowRight", " "].includes(event.key)) {
+      event.preventDefault();
+    }
+
+    keys[event.key] = true;
+
+    if (event.key === " " && state === "ready") {
+      startGame();
+    } else if (event.key === "Escape" && state === "playing") {
+      pauseGame();
+    }
+  });
+
+  window.addEventListener("keyup", event => {
+    keys[event.key] = false;
+  });
+
+  window.addEventListener("blur", () => {
+    for (const key in keys) keys[key] = false;
+  });
+
+  startButton.addEventListener("click", () => {
+    if (state === "paused") {
+      resumeGame();
+    } else {
+      startGame();
+    }
+  });
+
+  pauseButton.addEventListener("click", () => {
+    if (state === "playing" || state === "paused") {
+      pauseGame();
+    }
+  });
+
+  soundButton.addEventListener("click", () => {
+    soundEnabled = !soundEnabled;
+    soundButton.textContent = soundEnabled
+      ? "🔊 Âm thanh"
+      : "🔇 Tắt âm";
+
+    if (soundEnabled) playTone(700, .08);
+  });
+
+  // Vẽ nền ban đầu trước khi người chơi bắt đầu.
+  draw(performance.now());
+  updateUI();
+})();
+</script>
+</body>
+</html>
